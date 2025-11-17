@@ -1,0 +1,42 @@
+﻿@model IEnumerable<VehicleShowroom.Models.Moto>
+
+@{
+
+    Layout = "_Layout";
+    var brandName = Model.Any() ? Model.First().Brand : "No Data";
+    ViewData["Title"] = $"{brandName} Motorcycles";
+}
+
+<div class="container mt-5">
+
+    <h1 class="text-center mb-4">🏍️ @brandName Motorcycles</h1>
+
+    <div class="row justify-content-center">
+        @foreach (var bike in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-0 rounded-4 h-100">
+
+                    <img src="@Url.Content("~/images/" + System.IO.Path.GetFileName(bike.ImageUrl))"
+                         class="card-img-top" style="height:200px; object-fit:cover;" />
+
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold">@bike.Name - @bike.Model</h5>
+
+                        <p class="text-muted mb-2">
+                            Brand: <strong>@bike.Brand</strong>
+                        </p>
+
+                        <p class="text-success fw-bold fs-5">@bike.Price.ToString("C0")</p>
+
+                        <a asp-controller="Vehicles" asp-action="BikeDetails" asp-route-id="@bike.Id"
+                           class="btn btn-dark w-100">
+                            View Details
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+</div>

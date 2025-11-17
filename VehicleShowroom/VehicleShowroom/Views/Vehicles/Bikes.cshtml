@@ -1,0 +1,49 @@
+﻿@model IEnumerable<VehicleShowroom.Models.Moto>
+
+@{
+    Layout = "_Layout";
+
+    ViewData["Title"] = "Motorcycles";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-3">🏍️ Motorcycles</h1>
+    <h4 class="text-center text-muted mb-5">Ride with power and style</h4>
+
+   <!-- 🔥 Buttons to filter by motorcycle brand -->
+<div class="text-center mt-4 mb-4">
+    <a asp-action="BikesByBrand" asp-route-brand="BMW" class="btn btn-outline-dark mx-2 px-4">BMW</a>
+    <a asp-action="BikesByBrand" asp-route-brand="Hurlly" class="btn btn-outline-dark mx-2 px-4">Hurlly</a>
+    <a asp-action="BikesByBrand" asp-route-brand="Honda" class="btn btn-outline-dark mx-2 px-4">Honda</a>
+    <a asp-action="BikesByBrand" asp-route-brand="Yamaha" class="btn btn-outline-dark mx-2 px-4">Yamaha</a>
+    <a asp-action="BikesByBrand" asp-route-brand="Dayun" class="btn btn-outline-dark mx-2 px-4">Dayun</a>
+</div>
+
+<!-- 🎞️ Slider Section -->
+<div id="bikeSlider" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-inner">
+
+        <div class="carousel-item active">
+            <img src="~/images/moto.png" class="d-block w-100" style="height:380px; object-fit:cover;" />
+        </div>
+
+        <div class="carousel-item">
+            <img src="~/images/motor.jpg" class="d-block w-100" style="height:380px; object-fit:cover;" />
+        </div>
+
+        <div class="carousel-item">
+            <img src="~/images/yamaha.jpg" class="d-block w-100" style="height:380px; object-fit:cover;" />
+        </div>
+
+    </div>
+
+    <!-- Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#bikeSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <button class="carousel-control-next" type="button" data-bs-target="#bikeSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+

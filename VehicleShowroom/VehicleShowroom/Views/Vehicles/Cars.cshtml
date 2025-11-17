@@ -1,0 +1,66 @@
+﻿@model IEnumerable<VehicleShowroom.Models.Car>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Cars";
+
+    // 🔥 قائمة براندات ثابتة
+    var brands = new List<string> { "BMW", "Ferrari", "Porsche", "Mercedes", "Audi" };
+}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary">🚗 Available Car Brands</h1>
+        <p class="text-muted fs-5">Choose a brand to view its available cars</p>
+    </div>
+
+    <!-- 🔥 Buttons with fixed brand names -->
+    <div class="row justify-content-center mb-4">
+        @foreach (var brand in brands)
+        {
+            <div class="col-6 col-md-3 mb-3 text-center">
+                <a asp-controller="Vehicles"
+                   asp-action="CarsByBrand"
+                   asp-route-brand="@brand"
+                   class="btn btn-outline-primary w-100 py-3 fw-bold rounded-4 shadow-sm">
+                    @brand
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- ▬▬▬ Slider ▬▬▬ -->
+    <div class="d-flex justify-content-center">
+        <div id="vehicleSlider"
+             class="carousel slide shadow-lg rounded-4 overflow-hidden"
+             data-bs-ride="carousel"
+             style="width: 80%; max-width: 750px; border: 4px solid #0d6efd;">
+
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="~/images/BMW2.png" class="d-block w-100"
+                         style="height:430px; object-fit:cover;" alt="BMW Car">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/images/bmw.ss.jpg" class="d-block w-100"
+                         style="height:430px; object-fit:cover;" alt="BMW Car">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/images/bmw13.jpg" class="d-block w-100"
+                         style="height:430px; object-fit:cover;" alt="Motorcycle">
+                </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#vehicleSlider" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-dark p-3 rounded-circle"></span>
+            </button>
+
+            <button class="carousel-control-next" type="button" data-bs-target="#vehicleSlider" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-dark p-3 rounded-circle"></span>
+            </button>
+
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,22 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+
+@{
+	// هنا اختلفت صفحة ال show details عن show all لان هنا بجيب طالب واحد مش كل الطلاب
+}
+@model Student
+<style>
+    h1{
+        color: orangered;
+	}
+</style>
+
+
+<h1 class="text-center">Student Details</h1>
+<h1> @Model.Id</h1>
+<h1> @Model.Name</h1>
+ <img src="/images/@Model.ImageURL" alt="Alternate Text" width="100"/>
+

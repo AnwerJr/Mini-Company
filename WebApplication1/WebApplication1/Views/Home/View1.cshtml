@@ -1,0 +1,38 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@{
+	// This is a comment in Razor syntax علشان اعرف اعمل كود خاص ب css
+        }
+<style>
+    div{
+        color:green
+    }
+</style>
+@{
+    ViewData["Title"] = "Test View 1 Bage";
+
+}
+<div class="text-center">
+    <h1 class="display-4">Welcome This is the View 1 Page</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    @{
+        var name = "Ali";
+        var age = 25;
+        var maried = true;
+    }
+    <h2>
+		Hello @name </h2> 
+
+    @{
+        if (maried == true)
+        {
+            <h2>Ali IS MAried</h2>
+        }
+        else
+        {
+            <h2>Ali Is Single</h2>
+        }
+    }
