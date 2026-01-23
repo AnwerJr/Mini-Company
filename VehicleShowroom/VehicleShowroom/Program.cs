@@ -13,6 +13,7 @@ namespace VehicleShowroom
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDistributedMemoryCache();
 
             builder.Services.AddSession();
 

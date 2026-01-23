@@ -12,7 +12,6 @@ namespace VehicleShowroom.Models
         public DbSet<Moto> Motorcycles { get; set; }
         public DbSet<Carts> Carts { get; set; }
         public DbSet<Helmets> Helmet { get; set; }
-
-
+        public object CartItems { get; internal set; }
     }
 }

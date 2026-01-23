@@ -14,10 +14,11 @@
                 @{
                     //image
                 }
-                <img src="~/images/@Model.ImageUrl"
+                <img src="@Url.Content("~/images/" + Model.ImageUrl)"
                      class="card-img-top"
                      style="height:400px; object-fit:cover;"
                      alt="@Model.Name" />
+
 
 
 
@@ -39,7 +40,11 @@
                     <a asp-controller="Vehicles" asp-action="Cars" class="btn btn-outline-secondary px-4">
                         ⬅ Back to Cars
                     </a>
-                    <a href="#" class="btn btn-primary px-4">
+                    <a asp-controller="Cart"
+                       asp-action="Add"
+                       asp-route-id="@Model.Id"
+                       asp-route-type="Car"
+                       class="btn btn-success">
                         🛒 Add to Cart
                     </a>
                 </div>

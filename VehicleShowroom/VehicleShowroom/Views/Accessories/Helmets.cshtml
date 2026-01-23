@@ -6,15 +6,28 @@
     @foreach (var item in Model)
     {
         <div class="col-md-3 mb-4">
-            <div class="card shadow">
+            <div class="card shadow h-100">
+
+                <!-- صورة الخوذة -->
                 <img src="@Url.Content("~/images/" + item.ImageUrl)"
                      class="card-img-top"
-                     style="height:200px;object-fit:cover;" />
-                <div class="card-body">
+                     style="height:200px; object-fit:cover;" />
+
+                <!-- زر إضافة للسلة -->
+                <a asp-controller="Cart"
+                   asp-action="AddHelmet"
+                   asp-route-id="@item.Id"
+                   class="btn btn-success btn-sm w-75">
+                    🛒 إضافة إلى السلة
+                </a>
+
+
+                <div class="card-body text-center">
                     <h5 class="card-title">@item.Brand</h5>
                     <p class="card-text">Color: @item.Color</p>
                     <p class="card-text fw-bold">@item.Price EGP</p>
                 </div>
+
             </div>
         </div>
     }
