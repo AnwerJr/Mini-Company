@@ -1,0 +1,479 @@
+﻿@model IEnumerable<ShopMaster.Models.SystemSetting>
+@{
+    ViewData["Title"] = "إعدادات النظام";
+    var groupedSettings = Model.GroupBy(s => GetSettingCategory(s.Key)).OrderBy(g => g.Key);
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .settings-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 12px 24px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .tab-btn:hover {
+            border-color: #4facfe;
+            background: #f0f9ff;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #4facfe;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .setting-item {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+        .setting-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.1);
+        }
+
+    .setting-label {
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+    }
+
+    .setting-description {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+        font-style: italic;
+    }
+
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+        .form-control:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            outline: none;
+        }
+
+    .btn-modern {
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+    .btn-secondary-modern {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .btn-success-modern {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        color: white;
+    }
+
+    .save-actions {
+        position: sticky;
+        bottom: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border-right: 5px solid #3b82f6;
+    }
+
+    .category-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .icon-store {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .icon-money {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    }
+
+    .icon-shipping {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .icon-system {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1>
+        <i class="fas fa-cogs"></i>
+        إعدادات النظام
+    </h1>
+    <p style="margin: 10px 0 0 0; opacity: 0.9;">إدارة وتخصيص إعدادات المتجر</p>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Info Box -->
+<div class="info-box">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <i class="fas fa-lightbulb" style="font-size: 2rem; color: #3b82f6;"></i>
+        <div>
+            <strong style="display: block; color: #1e40af; margin-bottom: 5px;">نصيحة:</strong>
+            <span style="color: #1e40af;">تأكد من حفظ التغييرات بعد تعديل أي إعداد. بعض الإعدادات قد تحتاج إعادة تشغيل النظام.</span>
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<form asp-action="Update" method="post">
+    @foreach (var category in groupedSettings)
+    {
+        <div class="settings-card">
+            <div class="section-title">
+                <div class="category-icon icon-@GetCategoryClass(category.Key)">
+                    <i class="fas fa-@GetCategoryIcon(category.Key)"></i>
+                </div>
+                <span>@GetCategoryName(category.Key)</span>
+            </div>
+
+            <div class="row">
+                @foreach (var setting in category)
+                {
+                    <div class="col-md-6">
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <i class="fas fa-@GetSettingIcon(setting.Key)" style="color: #4facfe;"></i>
+                                @GetSettingDisplayName(setting.Key)
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(setting.Description))
+                            {
+                                <div class="setting-description">
+                                    <i class="fas fa-info-circle"></i> @setting.Description
+                                </div>
+                            }
+
+                            @if (IsBoolean(setting.Value))
+                            {
+                                <div class="form-check" style="background: white; padding: 12px; border-radius: 8px;">
+                                    <input type="checkbox" class="form-check-input"
+                                           name="settings[@setting.Key]"
+                                           value="true"
+                                           @(setting.Value.ToLower() == "true" ? "checked" : "")
+                                           style="width: 20px; height: 20px; cursor: pointer;">
+                                    <label class="form-check-label" style="margin-right: 10px; cursor: pointer;">
+                                        @(setting.Value.ToLower() == "true" ? "✅ مفعّل" : "❌ معطّل")
+                                    </label>
+                                </div>
+                            }
+                            else if (IsNumeric(setting.Value))
+                            {
+                                <input type="number"
+                                       class="form-control"
+                                       name="settings[@setting.Key]"
+                                       value="@setting.Value"
+                                       step="0.01">
+                            }
+                            else if (setting.Key.Contains("Email"))
+                            {
+                                <input type="email"
+                                       class="form-control"
+                                       name="settings[@setting.Key]"
+                                       value="@setting.Value">
+                            }
+                            else if (setting.Key.Contains("Phone"))
+                            {
+                                <input type="tel"
+                                       class="form-control"
+                                       name="settings[@setting.Key]"
+                                       value="@setting.Value">
+                            }
+                            else if (IsLongText(setting.Value))
+                            {
+                                <textarea class="form-control"
+                              name="settings[@setting.Key]"
+                              rows="3">@setting.Value</textarea>
+                            }
+                            else
+                            {
+                                <input type="text"
+                                       class="form-control"
+                                       name="settings[@setting.Key]"
+                                       value="@setting.Value">
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Save Actions -->
+    <div class="save-actions">
+        <div>
+            <i class="fas fa-save" style="color: #64748b; font-size: 1.5rem;"></i>
+            <span style="color: #64748b; margin-right: 10px;">آخر تحديث: @Model.Max(s => s.UpdatedAt).ToString("yyyy/MM/dd - hh:mm tt")</span>
+        </div>
+        <div style="display: flex; gap: 15px;">
+            <button type="reset" class="btn-modern btn-secondary-modern" onclick="return confirm('هل تريد التراجع عن التغييرات؟')">
+                <i class="fas fa-undo"></i>
+                إعادة تعيين
+            </button>
+            <button type="submit" class="btn-modern btn-success-modern">
+                <i class="fas fa-save"></i>
+                حفظ جميع التغييرات
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Add New Setting Button -->
+<div style="margin-top: 20px; text-align: center;">
+    <a asp-action="Create" class="btn-modern btn-primary-modern">
+        <i class="fas fa-plus-circle"></i>
+        إضافة إعداد جديد
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function() {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+            btn.disabled = true;
+        });
+
+        // Auto-save indicator
+        let changesMade = false;
+        document.querySelectorAll('input, textarea, select').forEach(input => {
+            input.addEventListener('change', function() {
+                changesMade = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (changesMade) {
+                e.preventDefault();
+                e.returnValue = 'لديك تغييرات غير محفوظة. هل تريد المغادرة؟';
+            }
+        });
+
+        // Checkbox toggle text
+        document.querySelectorAll('.form-check-input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                label.textContent = this.checked ? '✅ مفعّل' : '❌ معطّل';
+            });
+        });
+    </script>
+}
+
+@functions {
+    string GetSettingCategory(string key)
+    {
+        if (key.Contains("Store") || key.Contains("Support") || key.Contains("Working"))
+            return "Store";
+        if (key.Contains("Currency") || key.Contains("Tax") || key.Contains("MinOrder") || key.Contains("Price"))
+            return "Financial";
+        if (key.Contains("Shipping") || key.Contains("Return"))
+            return "Shipping";
+        return "System";
+    }
+
+    string GetCategoryName(string category)
+    {
+        return category switch
+        {
+            "Store" => "معلومات المتجر",
+            "Financial" => "الإعدادات المالية",
+            "Shipping" => "الشحن والتوصيل",
+            "System" => "إعدادات النظام",
+            _ => "إعدادات أخرى"
+        };
+    }
+
+    string GetCategoryIcon(string category)
+    {
+        return category switch
+        {
+            "Store" => "store",
+            "Financial" => "dollar-sign",
+            "Shipping" => "shipping-fast",
+            "System" => "cogs",
+            _ => "sliders-h"
+        };
+    }
+
+    string GetCategoryClass(string category)
+    {
+        return category switch
+        {
+            "Store" => "store",
+            "Financial" => "money",
+            "Shipping" => "shipping",
+            "System" => "system",
+            _ => "system"
+        };
+    }
+
+    string GetSettingIcon(string key)
+    {
+        if (key.Contains("Name")) return "tag";
+        if (key.Contains("Email")) return "envelope";
+        if (key.Contains("Phone")) return "phone";
+        if (key.Contains("Address")) return "map-marker-alt";
+        if (key.Contains("Currency")) return "money-bill-wave";
+        if (key.Contains("Tax")) return "percent";
+        if (key.Contains("Shipping")) return "truck";
+        if (key.Contains("Working")) return "clock";
+        if (key.Contains("Return")) return "undo";
+        if (key.Contains("Maintenance")) return "tools";
+        if (key.Contains("Guest")) return "user";
+        if (key.Contains("Stock")) return "boxes";
+        return "cog";
+    }
+
+    string GetSettingDisplayName(string key)
+    {
+        return key switch
+        {
+            "StoreName" => "اسم المتجر",
+            "StoreEmail" => "البريد الإلكتروني",
+            "StorePhone" => "رقم الهاتف",
+            "StoreAddress" => "العنوان",
+            "Currency" => "رمز العملة",
+            "TaxRate" => "نسبة الضريبة (%)",
+            "DefaultShippingCost" => "تكلفة الشحن الافتراضية",
+            "MinOrderAmount" => "الحد الأدنى للطلب",
+            "FreeShippingThreshold" => "قيمة الشحن المجاني",
+            "LowStockAlert" => "تنبيه المخزون المنخفض",
+            "WorkingHours" => "ساعات العمل",
+            "SupportEmail" => "بريد الدعم الفني",
+            "ReturnPolicy" => "مدة سياسة الإرجاع (أيام)",
+            "AllowGuestCheckout" => "السماح بالشراء كضيف",
+            "MaintenanceMode" => "وضع الصيانة",
+            _ => key
+        };
+    }
+
+    bool IsBoolean(string value)
+    {
+        return value.ToLower() == "true" || value.ToLower() == "false";
+    }
+
+    bool IsNumeric(string value)
+    {
+        return decimal.TryParse(value, out _);
+    }
+
+    bool IsLongText(string value)
+    {
+        return value.Length > 50 || value.Contains("\n");
+    }
+}

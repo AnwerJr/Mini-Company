@@ -1,0 +1,580 @@
+﻿@using EcommerceERP.Helpers
+@model ShopMaster.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "لوحة التحكم الرئيسية";
+}
+
+<style>
+    /* Custom Styles for Modern Dashboard */
+    .dashboard-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            top: -60%;
+            right: -60%;
+        }
+
+        .stat-card.primary {
+            --gradient-start: #667eea;
+            --gradient-end: #764ba2;
+        }
+
+        .stat-card.success {
+            --gradient-start: #56ab2f;
+            --gradient-end: #a8e063;
+        }
+
+        .stat-card.info {
+            --gradient-start: #4facfe;
+            --gradient-end: #00f2fe;
+        }
+
+        .stat-card.warning {
+            --gradient-start: #f093fb;
+            --gradient-end: #f5576c;
+        }
+
+    .stat-icon {
+        font-size: 48px;
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-subtitle {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 5px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2d3748;
+        position: relative;
+        padding-right: 15px;
+    }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+    .table-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+        .table-card .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px 15px 0 0;
+            padding: 20px;
+        }
+
+        .table-card.success .card-header {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        .table-card.danger .card-header {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+
+    .custom-table {
+        margin-bottom: 0;
+    }
+
+        .custom-table thead th {
+            border-bottom: 2px solid #e2e8f0;
+            color: #4a5568;
+            font-weight: 600;
+            padding: 15px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .custom-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .custom-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+            .custom-table tbody tr:hover {
+                background-color: #f7fafc;
+                transform: scale(1.01);
+            }
+
+    .badge-custom {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    .btn-modern {
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    .low-stock-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .chart-placeholder {
+        height: 300px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 1.2rem;
+        margin: 20px 0;
+    }
+
+    .product-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .product-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="row mb-4 fade-in">
+        <div class="col-12">
+            <h1 class="section-title">📊 لوحة التحكم الرئيسية</h1>
+            <p class="text-muted">مرحباً بك في نظام إدارة المتجر - نظرة شاملة على أداء متجرك</p>
+        </div>
+    </div>
+
+    <!-- الإحصائيات الرئيسية -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.1s">
+            <div class="stat-card primary">
+                <div class="stat-icon">📦</div>
+                <div class="stat-label">إجمالي الطلبات</div>
+                <div class="stat-number">@Model.TotalOrders</div>
+                <div class="stat-subtitle">
+                    <strong>@Model.PendingOrders</strong> قيد الانتظار
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.2s">
+            <div class="stat-card success">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">إجمالي العملاء</div>
+                <div class="stat-number">@Model.TotalCustomers</div>
+                <div class="stat-subtitle">عميل مسجل</div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.3s">
+            <div class="stat-card info">
+                <div class="stat-icon">🛍️</div>
+                <div class="stat-label">إجمالي المنتجات</div>
+                <div class="stat-number">@Model.TotalProducts</div>
+                <div class="stat-subtitle">منتج متاح</div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 fade-in" style="animation-delay: 0.4s">
+            <div class="stat-card warning">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">إجمالي الإيرادات</div>
+                <div class="stat-number">@Model.TotalRevenue.ToString("N0")<small style="font-size: 1rem"> ج.م</small></div>
+                <div class="stat-subtitle">
+                    <strong>@Model.MonthRevenue.ToString("N0") ج.م</strong> هذا الشهر
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الرسوم البيانية -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8 fade-in" style="animation-delay: 0.5s">
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <h5 class="section-title">📈 تحليل المبيعات الشهرية</h5>
+                    <div class="chart-placeholder">
+                        <div class="text-center">
+                            <i class="bi bi-graph-up" style="font-size: 3rem"></i>
+                            <p class="mt-3">سيتم إضافة الرسم البياني قريباً</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 fade-in" style="animation-delay: 0.6s">
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <h5 class="section-title">📊 توزيع الطلبات</h5>
+                    <div class="mt-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">تم التوصيل</span>
+                                <strong class="text-success">@Model.DeliveredOrders</strong>
+                            </div>
+                            <div class="progress" style="height: 10px; border-radius: 10px">
+                                <div class="progress-bar bg-success" style="width: @(Model.TotalOrders > 0 ? (Model.DeliveredOrders * 100.0 / Model.TotalOrders) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">قيد الانتظار</span>
+                                <strong class="text-warning">@Model.PendingOrders</strong>
+                            </div>
+                            <div class="progress" style="height: 10px; border-radius: 10px">
+                                <div class="progress-bar bg-warning" style="width: @(Model.TotalOrders > 0 ? (Model.PendingOrders * 100.0 / Model.TotalOrders) : 0)%"></div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4 p-3" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 10px">
+                            <div class="text-muted small">إيرادات اليوم</div>
+                            <h4 class="mb-0 mt-2" style="color: #667eea">@Model.TodayRevenue.ToString("N0") ج.م</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- آخر الطلبات -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6 fade-in" style="animation-delay: 0.7s">
+            <div class="table-card card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white">📦 آخر الطلبات</h5>
+                        <span class="badge bg-white text-primary">@(Model.RecentOrders?.Count ?? 0)</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>العميل</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+                                {
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="product-link">
+                                                    <strong>@(order.OrderNumber ?? $"طلب #{order.Id}")</strong>
+                                                </a>
+                                            </td>
+                                            <td>@(order.Customer?.FullName ?? "غير معروف")</td>
+                                            <td><strong>@order.TotalAmount.ToString("N0")</strong> ج.م</td>
+                                            <td>
+                                                <span class="badge badge-custom bg-@GetStatusColor(order.Status)">
+                                                    @GetStatusText(order.Status)
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            لا توجد طلبات حديثة
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-3 text-center" style="background-color: #f8f9fa">
+                        <a asp-controller="Orders" asp-action="Index" class="btn btn-primary btn-modern">
+                            عرض جميع الطلبات ←
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المنتجات الأكثر مبيعاً -->
+        <div class="col-lg-6 fade-in" style="animation-delay: 0.8s">
+            <div class="table-card card success">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white">🏆 الأكثر مبيعاً</h5>
+                        <span class="badge bg-white text-success">Top @(Model.TopSellingProducts?.Count ?? 0)</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>المنتج</th>
+                                    <th>الكمية</th>
+                                    <th>الإيرادات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.TopSellingProducts != null && Model.TopSellingProducts.Any())
+                                {
+                                    int rank = 1;
+                                    @foreach (var item in Model.TopSellingProducts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-success rounded-circle" style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center">
+                                                    @rank
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>@(item.ProductName ?? "منتج غير معروف")</strong>
+                                                @* لا يمكن عرض التصنيف هنا لأن ProductName هو string وليس كائن Product *@
+                                            </td>
+                                            <td><span class="badge bg-info">@item.TotalQuantity قطعة</span></td>
+                                            <td><strong class="text-success">@item.TotalRevenue.ToString("N0")</strong> ج.م</td>
+                                        </tr>
+                                        rank++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            لا توجد بيانات مبيعات
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-3 text-center" style="background-color: #f8f9fa">
+                        <a asp-controller="Dashboard" asp-action="TopProducts" class="btn btn-success btn-modern">
+                            عرض التقرير الكامل ←
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- المنتجات منخفضة المخزون -->
+    <div class="row mb-4">
+        <div class="col-12 fade-in" style="animation-delay: 0.9s">
+            <div class="table-card card danger">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-white">⚠️ تنبيه: منتجات منخفضة المخزون</h5>
+                        <span class="badge bg-white text-danger">@(Model.LowStockProducts?.Count ?? 0) منتج</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>الفئة</th>
+                                    <th>SKU</th>
+                                    <th>الكمية المتبقية</th>
+                                    <th>السعر</th>
+                                    <th>إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.LowStockProducts != null && Model.LowStockProducts.Any())
+                                {
+                                    @foreach (var product in Model.LowStockProducts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@(product.NameAr ?? "منتج غير معروف")</strong>
+                                                <br>
+                                                <small class="text-muted">@(product.Category?.NameAr ?? "غير مصنف")</small>
+                                            </td>
+                                            <td>@(product.Category?.NameAr ?? "غير مصنف")</td>
+                                            <td><code>@(product.SKU ?? "---")</code></td>
+                                            <td>
+                                                <span class="badge bg-danger low-stock-badge" style="font-size: 0.9rem; padding: 8px 12px">
+                                                    @product.StockQuantity فقط
+                                                </span>
+                                            </td>
+                                            <td><strong>@product.Price.ToString("N0")</strong> ج.م</td>
+                                            <td>
+                                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id"
+                                                   class="btn btn-sm btn-warning btn-modern">
+                                                    📝 تحديث المخزون
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            لا توجد منتجات منخفضة المخزون
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    // Returns a display string for the order status
+    public string GetStatusText(object status)
+    {
+        string statusStr = status?.ToString() ?? "";
+        switch (statusStr)
+        {
+            case "Pending":
+                return "قيد الانتظار";
+            case "Delivered":
+                return "تم التوصيل";
+            case "Cancelled":
+                return "ملغي";
+            case "Processing":
+                return "قيد المعالجة";
+            default:
+                return "غير معروف";
+        }
+    }
+
+    // Returns a Bootstrap color for the order status
+    public string GetStatusColor(object status)
+    {
+        string statusStr = status?.ToString() ?? "";
+        switch (statusStr)
+        {
+            case "Pending":
+                return "warning";
+            case "Delivered":
+                return "success";
+            case "Cancelled":
+                return "danger";
+            case "Processing":
+                return "info";
+            default:
+                return "secondary";
+        }
+    }
+}

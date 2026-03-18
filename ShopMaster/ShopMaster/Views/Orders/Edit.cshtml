@@ -1,0 +1,541 @@
+﻿@* Views/Orders/Index.cshtml *@
+@model IEnumerable<ShopMaster.Models.Order>
+
+@{
+    ViewData["Title"] = "الطلبات";
+    var statusList = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "", Text = "جميع الحالات" },
+        new SelectListItem { Value = "1", Text = "⏳ قيد الانتظار" },
+        new SelectListItem { Value = "2", Text = "✅ مؤكد" },
+        new SelectListItem { Value = "3", Text = "⚙️ قيد التجهيز" },
+        new SelectListItem { Value = "4", Text = "🚚 تم الشحن" },
+        new SelectListItem { Value = "5", Text = "📦 تم التوصيل" },
+        new SelectListItem { Value = "6", Text = "❌ ملغي" }
+    };
+
+    var paymentStatusList = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "", Text = "جميع حالات الدفع" },
+        new SelectListItem { Value = "1", Text = "⏳ في الانتظار" },
+        new SelectListItem { Value = "2", Text = "✅ مدفوع" },
+        new SelectListItem { Value = "3", Text = "❌ فشل الدفع" },
+        new SelectListItem { Value = "4", Text = "↩️ مسترد" }
+    };
+}
+
+<style>
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 25px 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+        .page-header h1 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+    /* تحسين تصميم الفلاتر */
+    .filter-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #cbd5e1;
+    }
+
+    .filter-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-group {
+        margin-bottom: 20px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .filter-select {
+        border: 2px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 12px 15px;
+        width: 100%;
+        background: white;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+        .filter-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            outline: none;
+        }
+
+    .filter-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #cbd5e1;
+    }
+
+    .btn-filter {
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-reset {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-reset:hover {
+        background: #cbd5e1;
+    }
+
+    /* تصميم البطاقات */
+    .order-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .order-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .order-number {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .order-date {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .order-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .badge-status {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-failed {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-refunded {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-view {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .btn-edit {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+
+    /* حالة عدم وجود نتائج */
+    .no-results {
+        text-align: center;
+        padding: 50px 20px;
+        background: white;
+        border-radius: 15px;
+        margin-top: 20px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .no-results-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 30px;
+        color: #64748b;
+    }
+
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* تخصيص الـ select بالألوان */
+    .status-pending {
+        color: #f59e0b;
+    }
+
+    .status-confirmed {
+        color: #3b82f6;
+    }
+
+    .status-processing {
+        color: #8b5cf6;
+    }
+
+    .status-shipped {
+        color: #64748b;
+    }
+
+    .status-delivered {
+        color: #10b981;
+    }
+
+    .status-cancelled {
+        color: #ef4444;
+    }
+
+    .payment-pending {
+        color: #f59e0b;
+    }
+
+    .payment-paid {
+        color: #10b981;
+    }
+
+    .payment-failed {
+        color: #ef4444;
+    }
+
+    .payment-refunded {
+        color: #8b5cf6;
+    }
+</style>
+
+<div class="container-fluid" dir="rtl">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-shopping-bag"></i>
+            إدارة الطلبات
+        </h1>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <div class="filter-header">
+            <div class="filter-title">
+                <i class="fas fa-filter"></i>
+                تصفية الطلبات
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-tasks"></i>
+                        حالة الطلب
+                    </label>
+                    <select id="statusFilter" class="filter-select">
+                        @foreach (var item in statusList)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-credit-card"></i>
+                        حالة الدفع
+                    </label>
+                    <select id="paymentStatusFilter" class="filter-select">
+                        @foreach (var item in paymentStatusList)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-user"></i>
+                        العميل
+                    </label>
+                    <input type="text" id="customerFilter" class="filter-select" placeholder="ابحث باسم العميل..." />
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-buttons">
+            <button type="button" id="resetFilter" class="btn-filter btn-reset">
+                <i class="fas fa-redo"></i>
+                إعادة تعيين
+            </button>
+            <button type="button" id="applyFilter" class="btn-filter btn-apply">
+                <i class="fas fa-filter"></i>
+                تطبيق التصفية
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Container -->
+    <div id="ordersContainer">
+        @await Html.PartialAsync("_OrdersList", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // تطبيق التصفية عند تغيير القيم
+            $('#statusFilter, #paymentStatusFilter, #customerFilter').change(function () {
+                applyFilters();
+            });
+
+            // تطبيق التصفية عند الضغط على زر التطبيق
+            $('#applyFilter').click(function () {
+                applyFilters();
+            });
+
+            // إعادة تعيين الفلاتر
+            $('#resetFilter').click(function () {
+                $('#statusFilter').val('');
+                $('#paymentStatusFilter').val('');
+                $('#customerFilter').val('');
+                applyFilters();
+            });
+
+            // دالة تطبيق الفلاتر
+            function applyFilters() {
+                const status = $('#statusFilter').val();
+                const paymentStatus = $('#paymentStatusFilter').val();
+                const customer = $('#customerFilter').val();
+
+                // عرض رسالة تحميل
+                $('#ordersContainer').html(`
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>جاري تحميل النتائج...</p>
+                    </div>
+                `);
+
+                // إرسال طلب AJAX إلى FilterOrders
+                $.ajax({
+                    url: '@Url.Action("FilterOrders", "Orders")',
+                    type: 'GET',
+                    data: {
+                        status: status,
+                        paymentStatus: paymentStatus,
+                        customerName: customer
+                    },
+                    success: function (response) {
+                        $('#ordersContainer').html(response);
+
+                        // إضافة تأثير ظهور
+                        $('.order-card').hide().fadeIn(500);
+                    },
+                    error: function () {
+                        $('#ordersContainer').html(`
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                حدث خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى.
+                            </div>
+                        `);
+                    }
+                });
+            }
+
+            // إضافة تأثيرات للـ select عند التغيير
+            $('#statusFilter').change(function() {
+                const select = $(this);
+                select.removeClass('status-pending status-confirmed status-processing status-shipped status-delivered status-cancelled');
+
+                switch(select.val()) {
+                    case '1': select.addClass('status-pending'); break;
+                    case '2': select.addClass('status-confirmed'); break;
+                    case '3': select.addClass('status-processing'); break;
+                    case '4': select.addClass('status-shipped'); break;
+                    case '5': select.addClass('status-delivered'); break;
+                    case '6': select.addClass('status-cancelled'); break;
+                }
+            });
+
+            $('#paymentStatusFilter').change(function() {
+                const select = $(this);
+                select.removeClass('payment-pending payment-paid payment-failed payment-refunded');
+
+                switch(select.val()) {
+                    case '1': select.addClass('payment-pending'); break;
+                    case '2': select.addClass('payment-paid'); break;
+                    case '3': select.addClass('payment-failed'); break;
+                    case '4': select.addClass('payment-refunded'); break;
+                }
+            });
+
+            // تفعيل الألوان عند التحميل
+            $('#statusFilter').trigger('change');
+            $('#paymentStatusFilter').trigger('change');
+        });
+    </script>
+}

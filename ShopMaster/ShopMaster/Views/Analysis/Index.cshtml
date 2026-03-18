@@ -1,0 +1,399 @@
+﻿@using ShopMaster.ViewModels
+@model AnalysisViewModel
+
+@{
+    ViewData["Title"] = "تحليل الأداء";
+    var arabicMonths = new[] { "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر" };
+}
+
+<style>
+    .analysis-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+        .analysis-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .growth-positive {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .growth-negative {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .kpi-box {
+        padding: 20px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .kpi-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .table-header {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .badge-day {
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #e9ecef;
+        font-size: 0.85rem;
+    }
+
+    .filter-bar {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <!-- عنوان الصفحة مع فلتر السنة -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="section-title">📊 تحليل الأداء</h1>
+            <p class="text-muted">تحليل شامل لأداء المتجر ومقارنة سنوية</p>
+        </div>
+        <div class="col-md-4">
+            <div class="filter-bar">
+                <form method="get" class="row g-2">
+                    <div class="col-8">
+                        <select name="year" class="form-select" onchange="this.form.submit()">
+                            @foreach (var y in Model.AvailableYears)
+                            {
+                                <option value="@y" selected="@(y == Model.SelectedYear ? true : false)">
+                                    @y
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-primary w-100">عرض</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات المؤشرات الرئيسية -->
+    <div class="row g-4 mb-4">
+        <!-- الإيرادات -->
+        <div class="col-md-3">
+            <div class="kpi-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="kpi-label">إيرادات @Model.SelectedYear</div>
+                <div class="kpi-value">@Model.CurrentYearRevenue.ToString("N0") ج.م</div>
+                <div class="mt-2">
+                    <small>@Model.PreviousYear: @Model.PreviousYearRevenue.ToString("N0") ج.م</small>
+                    <br>
+                    <span class="@(Model.RevenueGrowthPercent >= 0 ? "growth-positive" : "growth-negative")">
+                        @(Model.RevenueGrowthPercent >= 0 ? "▲" : "▼") @Math.Abs(Model.RevenueGrowthPercent).ToString("F1")%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الطلبات -->
+        <div class="col-md-3">
+            <div class="kpi-box" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);">
+                <div class="kpi-label">طلبات @Model.SelectedYear</div>
+                <div class="kpi-value">@Model.CurrentYearOrders</div>
+                <div class="mt-2">
+                    <small>@Model.PreviousYear: @Model.PreviousYearOrders</small>
+                    <br>
+                    <span class="@(Model.OrdersGrowthPercent >= 0 ? "growth-positive" : "growth-negative")">
+                        @(Model.OrdersGrowthPercent >= 0 ? "▲" : "▼") @Math.Abs(Model.OrdersGrowthPercent).ToString("F1")%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- معدل الإلغاء -->
+        <div class="col-md-3">
+            <div class="kpi-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="kpi-label">نسبة الإلغاء</div>
+                <div class="kpi-value">@Model.CancellationRate.ToString("F1")%</div>
+                <div class="mt-2">
+                    <small>من إجمالي طلبات @Model.SelectedYear</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- إجمالي الطلبات المكتملة -->
+        <div class="col-md-3">
+            <div class="kpi-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="kpi-label">طلبات مكتملة</div>
+                <div class="kpi-value">@Model.CurrentYearOrders</div>
+                <div class="mt-2">
+                    <small>من أصل @(Model.CurrentYearOrders + (int)(Model.CurrentYearOrders * Model.CancellationRate / 100))</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول المقارنة الشهرية -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="analysis-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">📅 مقارنة شهرية (@Model.PreviousYear vs @Model.SelectedYear)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>الشهر</th>
+                                    <th class="text-center">إيرادات @Model.PreviousYear</th>
+                                    <th class="text-center">إيرادات @Model.SelectedYear</th>
+                                    <th class="text-center">نمو الإيرادات</th>
+                                    <th class="text-center">طلبات @Model.PreviousYear</th>
+                                    <th class="text-center">طلبات @Model.SelectedYear</th>
+                                    <th class="text-center">نمو الطلبات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var month in Model.MonthlyComparison)
+                                {
+                                    var revenueGrowth = month.GrowthPercent;
+                                    var ordersGrowth = month.PreviousYearOrders > 0
+                                    ? ((month.CurrentYearOrders - month.PreviousYearOrders) / (decimal)month.PreviousYearOrders) * 100
+                                    : (month.CurrentYearOrders > 0 ? 100 : 0);
+
+                                    <tr>
+                                        <td><strong>@arabicMonths[month.Month - 1]</strong></td>
+                                        <td class="text-center">@month.PreviousYearRevenue.ToString("N0") ج.م</td>
+                                        <td class="text-center">@month.CurrentYearRevenue.ToString("N0") ج.م</td>
+                                        <td class="text-center">
+                                            <span class="@(revenueGrowth >= 0 ? "text-success" : "text-danger")">
+                                                @(revenueGrowth >= 0 ? "▲" : "▼") @Math.Abs(revenueGrowth).ToString("F1")%
+                                            </span>
+                                        </td>
+                                        <td class="text-center">@month.PreviousYearOrders</td>
+                                        <td class="text-center">@month.CurrentYearOrders</td>
+                                        <td class="text-center">
+                                            <span class="@(ordersGrowth >= 0 ? "text-success" : "text-danger")">
+                                                @(ordersGrowth >= 0 ? "▲" : "▼") @Math.Abs(ordersGrowth).ToString("F1")%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحليل المنتجات والعملاء -->
+    <div class="row g-4 mb-4">
+        <!-- أفضل المنتجات -->
+        <div class="col-lg-6">
+            <div class="analysis-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">🏆 أفضل 10 منتجات (@Model.SelectedYear)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>#</th>
+                                    <th>المنتج</th>
+                                    <th>الكمية المباعة</th>
+                                    <th>الإيرادات</th>
+                                    <th>عدد الطلبات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int productRank = 1;
+                                }
+                                @foreach (var product in Model.ProductAnalysis.Take(10))
+                                {
+                                    <tr>
+                                        <td>@(productRank++)</td>
+                                        <td>@product.ProductName</td>
+                                        <td>@product.QuantitySold</td>
+                                        <td>@product.Revenue.ToString("N0") ج.م</td>
+                                        <td>@product.OrdersCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- أفضل العملاء -->
+        <div class="col-lg-6">
+            <div class="analysis-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">👥 أفضل 20 عميل (@Model.SelectedYear)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>#</th>
+                                    <th>العميل</th>
+                                    <th>عدد الطلبات</th>
+                                    <th>إجمالي المشتريات</th>
+                                    <th>متوسط الطلب</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int customerRank = 1;
+                                }
+                                @foreach (var customer in Model.CustomerAnalysis.Take(10))
+                                {
+                                    <tr>
+                                        <td>@(customerRank++)</td>
+                                        <td>@customer.CustomerName</td>
+                                        <td>@customer.TotalOrders</td>
+                                        <td>@customer.TotalSpent.ToString("N0") ج.م</td>
+                                        <td>@customer.AverageOrderValue.ToString("N0") ج.م</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- توزيع الطلبات على أيام الأسبوع والمنتجات منخفضة المخزون -->
+    <div class="row g-4">
+        <!-- أيام الأسبوع -->
+        <div class="col-lg-6">
+            <div class="analysis-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">📆 توزيع الطلبات على أيام الأسبوع</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>اليوم</th>
+                                    <th class="text-center">عدد الطلبات</th>
+                                    <th class="text-center">الإيرادات</th>
+                                    <th class="text-center">النسبة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var totalOrdersForDays = Model.OrdersByDayOfWeek.Sum(d => d.OrderCount);
+                                    var arabicDays = new Dictionary<DayOfWeek, string>
+                                                                {
+                                                                { DayOfWeek.Sunday, "الأحد" },
+                                                                { DayOfWeek.Monday, "الإثنين" },
+                                                                { DayOfWeek.Tuesday, "الثلاثاء" },
+                                                                { DayOfWeek.Wednesday, "الأربعاء" },
+                                                                { DayOfWeek.Thursday, "الخميس" },
+                                                                { DayOfWeek.Friday, "الجمعة" },
+                                                                { DayOfWeek.Saturday, "السبت" }
+                                                                };
+                                }
+                                @foreach (var day in Model.OrdersByDayOfWeek)
+                                {
+                                    var percentage = totalOrdersForDays > 0 ? (day.OrderCount * 100.0 / totalOrdersForDays) : 0;
+                                    <tr>
+                                        <td><span class="badge-day">@arabicDays[day.DayOfWeek]</span></td>
+                                        <td class="text-center">@day.OrderCount</td>
+                                        <td class="text-center">@day.Revenue.ToString("N0") ج.م</td>
+                                        <td class="text-center">
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-primary"
+                                                     style="width: @percentage%;"
+                                                     role="progressbar">
+                                                    @percentage.ToString("F1")%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المنتجات منخفضة المخزون -->
+        <div class="col-lg-6">
+            <div class="analysis-card card border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">⚠️ منتجات منخفضة المخزون (أقل من 10 قطع)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>التصنيف</th>
+                                    <th>المخزون</th>
+                                    <th>الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.LowStockProducts.Any())
+                                {
+                                    @foreach (var product in Model.LowStockProducts)
+                                    {
+                                        <tr>
+                                            <td>@product.NameAr</td>
+                                            <td>@(product.Category?.NameAr ?? "غير مصنف")</td>
+                                            <td>
+                                                <span class="badge bg-danger">@product.StockQuantity قطعة</span>
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id"
+                                                   class="btn btn-sm btn-warning">تحديث</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            لا توجد منتجات منخفضة المخزون
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

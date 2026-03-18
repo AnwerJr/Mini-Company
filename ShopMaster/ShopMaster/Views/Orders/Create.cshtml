@@ -1,0 +1,450 @@
+﻿@model ShopMaster.ViewModels.OrderCreateViewModel
+@{
+    ViewData["Title"] = "إنشاء طلب جديد";
+    var products = ViewData["Products"] as List<ShopMaster.Models.Product>;
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 25px 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .product-item {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .product-item:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+
+        .product-item.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+    }
+
+    .product-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        color: #1e293b;
+    }
+
+    .product-price {
+        color: #16a34a;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .product-stock {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    .quantity-input {
+        width: 100%;
+        margin-top: 10px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 25px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #667eea;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+    .summary-label {
+        color: #64748b;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .summary-total {
+        color: #16a34a !important;
+        font-size: 1.5rem !important;
+    }
+
+    .btn-modern {
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        width: 100%;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+    .btn-secondary-modern {
+        background: #e2e8f0;
+        color: #475569;
+        margin-top: 10px;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</h1>
+</div>
+
+<form asp-action="Create" method="post" id="orderForm">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- معلومات العميل -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-user"></i>
+                    معلومات العميل
+                </h3>
+
+                <div class="form-group">
+                    <label asp-for="CustomerId" class="form-label">اختر العميل *</label>
+                    <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.CustomerId" required>
+                        <option value="">-- اختر العميل --</option>
+                    </select>
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- اختيار المنتجات -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    اختيار المنتجات
+                </h3>
+
+                <div class="products-grid">
+                    @{
+                        int index = 0;
+                    }
+                    @foreach (var product in products)
+                    {
+                        var price = product.DiscountPrice ?? product.Price;
+                        <div class="product-item" onclick="toggleProduct(@index, @product.Id, '@product.NameAr', @price)">
+                            <div class="product-image">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="product-name">@product.NameAr</div>
+                            <div class="product-price">@price.ToString("N0") ج.م</div>
+                            <div class="product-stock">متوفر: @product.StockQuantity</div>
+                            <input type="number"
+                                   class="form-control quantity-input"
+                                   id="qty_@index"
+                                   min="1"
+                                   max="@product.StockQuantity"
+                                   value="1"
+                                   style="display: none;"
+                                   onchange="updateSummary()" />
+                            <input type="hidden" name="Items[@index].ProductId" id="product_@index" value="0" />
+                            <input type="hidden" name="Items[@index].Quantity" id="quantity_@index" value="0" />
+                        </div>
+                        index++;
+                    }
+                </div>
+            </div>
+
+            <!-- ملاحظات -->
+            <div class="form-card">
+                <h3 class="section-title">
+                    <i class="fas fa-sticky-note"></i>
+                    ملاحظات إضافية
+                </h3>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="form-label">ملاحظات</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="ملاحظات خاصة بالطلب..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- ملخص الطلب -->
+            <div class="summary-card">
+                <h4 style="margin-bottom: 20px; color: #1e293b;">
+                    <i class="fas fa-receipt"></i> ملخص الطلب
+                </h4>
+
+                <div id="selectedProducts">
+                    <p style="text-align: center; color: #94a3b8; padding: 20px 0;">
+                        <i class="fas fa-shopping-cart" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <br>لم يتم اختيار منتجات
+                    </p>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">المجموع الفرعي:</span>
+                    <span class="summary-value" id="subtotal">0 ج.م</span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ShippingCost" class="form-label">تكلفة الشحن (ج.م)</label>
+                    <input asp-for="ShippingCost" type="number" step="0.01" class="form-control" value="0" onchange="updateSummary()" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DiscountAmount" class="form-label">قيمة الخصم (ج.م)</label>
+                    <input asp-for="DiscountAmount" type="number" step="0.01" class="form-control" value="0" onchange="updateSummary()" />
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">الإجمالي النهائي:</span>
+                    <span class="summary-value summary-total" id="total">0 ج.م</span>
+                </div>
+
+                <button type="submit" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-check-circle"></i>
+                    إنشاء الطلب
+                </button>
+
+                <a asp-action="Index" class="btn-modern btn-secondary-modern">
+                    <i class="fas fa-times"></i>
+                    إلغاء
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let selectedProducts = [];
+
+        function toggleProduct(index, productId, productName, price) {
+            const productDiv = document.querySelectorAll('.product-item')[index];
+            const qtyInput = document.getElementById(`qty_${index}`);
+            const productInput = document.getElementById(`product_${index}`);
+            const quantityInput = document.getElementById(`quantity_${index}`);
+
+            if (productDiv.classList.contains('selected')) {
+                // إلغاء التحديد
+                productDiv.classList.remove('selected');
+                qtyInput.style.display = 'none';
+                productInput.value = '0';
+                quantityInput.value = '0';
+
+                // إزالة من القائمة
+                selectedProducts = selectedProducts.filter(p => p.id !== productId);
+            } else {
+                // تحديد المنتج
+                productDiv.classList.add('selected');
+                qtyInput.style.display = 'block';
+                productInput.value = productId;
+                quantityInput.value = qtyInput.value;
+
+                // إضافة للقائمة
+                selectedProducts.push({
+                    id: productId,
+                    name: productName,
+                    price: price,
+                    quantity: parseInt(qtyInput.value)
+                });
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            // تحديث الكميات
+            selectedProducts = [];
+            const productItems = document.querySelectorAll('.product-item.selected');
+
+            productItems.forEach((item, idx) => {
+                const qtyInput = item.querySelector('.quantity-input');
+                const productId = parseInt(qtyInput.id.split('_')[1]);
+                const quantityHidden = document.getElementById(`quantity_${productId}`);
+
+                if (quantityHidden) {
+                    quantityHidden.value = qtyInput.value;
+                }
+            });
+
+            // حساب المجموع
+            let subtotal = 0;
+
+            document.querySelectorAll('.product-item.selected').forEach(item => {
+                const qtyInput = item.querySelector('.quantity-input');
+                const priceText = item.querySelector('.product-price').textContent;
+                const price = parseFloat(priceText.replace(/[^\d.]/g, ''));
+                const qty = parseInt(qtyInput.value) || 0;
+
+                subtotal += price * qty;
+            });
+
+            const shipping = parseFloat(document.querySelector('[name="ShippingCost"]').value) || 0;
+            const discount = parseFloat(document.querySelector('[name="DiscountAmount"]').value) || 0;
+            const total = subtotal + shipping - discount;
+
+            // عرض المنتجات المحددة
+            const selectedDiv = document.getElementById('selectedProducts');
+            if (subtotal > 0) {
+                let html = '';
+                document.querySelectorAll('.product-item.selected').forEach(item => {
+                    const name = item.querySelector('.product-name').textContent;
+                    const priceText = item.querySelector('.product-price').textContent;
+                    const price = parseFloat(priceText.replace(/[^\d.]/g, ''));
+                    const qty = parseInt(item.querySelector('.quantity-input').value);
+                    const itemTotal = price * qty;
+
+                    html += `
+                        <div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span><strong>${name}</strong></span>
+                                <span>${itemTotal.toLocaleString()} ج.م</span>
+                            </div>
+                            <div style="color: #64748b; font-size: 0.8rem; margin-top: 3px;">
+                                ${qty} × ${price.toLocaleString()} ج.م
+                            </div>
+                        </div>
+                    `;
+                });
+                selectedDiv.innerHTML = html;
+            } else {
+                selectedDiv.innerHTML = `
+                    <p style="text-align: center; color: #94a3b8; padding: 20px 0;">
+                        <i class="fas fa-shopping-cart" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <br>لم يتم اختيار منتجات
+                    </p>
+                `;
+            }
+
+            document.getElementById('subtotal').textContent = subtotal.toLocaleString() + ' ج.م';
+            document.getElementById('total').textContent = total.toLocaleString() + ' ج.م';
+        }
+
+        // منع إرسال النموذج إذا لم يتم اختيار منتجات
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            const hasProducts = document.querySelectorAll('.product-item.selected').length > 0;
+
+            if (!hasProducts) {
+                e.preventDefault();
+                alert('يجب اختيار منتج واحد على الأقل!');
+                return false;
+            }
+        });
+    </script>
+}

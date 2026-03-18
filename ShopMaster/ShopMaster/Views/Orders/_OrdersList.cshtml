@@ -1,0 +1,459 @@
+﻿@* Views/Orders/_OrdersList.cshtml *@
+@model IEnumerable<ShopMaster.Models.Order>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        @foreach (var order in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-number">
+                            <i class="fas fa-receipt"></i>
+                            @order.OrderNumber
+                        </div>
+                        <div class="order-date">
+                            <i class="far fa-calendar"></i>
+                            @order.OrderDate.ToString("yyyy/MM/dd")
+                        </div>
+                    </div>
+
+                    <div class="order-details">
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <i class="fas fa-user"></i>
+                                العميل:
+                            </span>
+                            <span class="detail-value">@(order.Customer?.FullName ?? "غير محدد")</span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <i class="fas fa-money-bill-wave"></i>
+                                المبلغ:
+                            </span>
+                            <span class="detail-value" style="color: #059669; font-weight: 700;">
+                                @order.TotalAmount.ToString("C") ج.م
+                            </span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <i class="fas fa-tasks"></i>
+                                الحالة:
+                            </span>
+                            <span class="badge-status @GetStatusClass(order.Status)">
+                                <i class="@GetStatusIcon(order.Status)"></i>
+                                @GetStatusText(order.Status)
+                            </span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">
+                                <i class="fas fa-credit-card"></i>
+                                الدفع:
+                            </span>
+                            <span class="badge-status @GetPaymentStatusClass(order.PaymentStatus)">
+                                <i class="@GetPaymentStatusIcon(order.PaymentStatus)"></i>
+                                @GetPaymentStatusText(order.PaymentStatus)
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(order.Notes))
+                        {
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="fas fa-sticky-note"></i>
+                                    ملاحظات:
+                                </span>
+                                <span class="detail-value" style="font-size: 0.85rem;">
+                                    @(order.Notes.Length > 30 ? order.Notes.Substring(0, 30) + "..." : order.Notes)
+                                </span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="order-actions">
+                        <a href="@Url.Action("Details", new { id = order.Id })"
+                           class="btn-action btn-view" title="عرض التفاصيل">
+                            <i class="fas fa-eye"></i>
+                            عرض
+                        </a>
+                        <a href="@Url.Action("Edit", new { id = order.Id })"
+                           class="btn-action btn-edit" title="تعديل الطلب">
+                            <i class="fas fa-edit"></i>
+                            تعديل
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = order.Id })"
+                           class="btn-action btn-delete" title="حذف الطلب"
+                           onclick="return confirm('هل أنت متأكد من حذف الطلب @order.OrderNumber؟');">
+                            <i class="fas fa-trash"></i>
+                            حذف
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- إحصائيات -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="alert alert-info" style="border-radius: 10px; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>إحصائيات:</strong>
+                        <span class="ms-3">
+                            <i class="fas fa-box-open"></i>
+                            عدد الطلبات: <strong class="text-primary">@Model.Count()</strong>
+                        </span>
+                        <span class="ms-3">
+                            <i class="fas fa-money-bill-wave"></i>
+                            إجمالي المبالغ: <strong class="text-success">@Model.Sum(o => o.TotalAmount).ToString("C") ج.م</strong>
+                        </span>
+                    </div>
+                    <button onclick="window.print()" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-print"></i>
+                        طباعة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="no-results">
+        <div class="no-results-icon">
+            <i class="fas fa-search fa-4x"></i>
+        </div>
+        <h4 class="mt-3" style="color: #475569;">لا توجد طلبات</h4>
+        <p class="text-muted" style="max-width: 500px; margin: 0 auto;">
+            لم يتم العثور على طلبات تطابق معايير البحث.
+            يمكنك محاولة تغيير معايير التصفية أو إضافة طلبات جديدة.
+        </p>
+        <div class="mt-4">
+            <a href="@Url.Action("Index")" class="btn btn-primary me-2">
+                <i class="fas fa-redo"></i>
+                عرض جميع الطلبات
+            </a>
+            <a href="@Url.Action("Create")" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i>
+                إضافة طلب جديد
+            </a>
+        </div>
+    </div>
+}
+
+@functions {
+    // دالة للحصول على كلاس حالة الطلب
+    string GetStatusClass(ShopMaster.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.OrderStatus.Pending => "badge-pending",
+            ShopMaster.Models.OrderStatus.Confirmed => "badge-confirmed",
+            ShopMaster.Models.OrderStatus.Processing => "badge-processing",
+            ShopMaster.Models.OrderStatus.Shipped => "badge-shipped",
+            ShopMaster.Models.OrderStatus.Delivered => "badge-delivered",
+            ShopMaster.Models.OrderStatus.Cancelled => "badge-cancelled",
+            _ => "badge-secondary"
+        };
+    }
+
+    // دالة للحصول على أيقونة حالة الطلب
+    string GetStatusIcon(ShopMaster.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.OrderStatus.Pending => "fas fa-clock",
+            ShopMaster.Models.OrderStatus.Confirmed => "fas fa-check-circle",
+            ShopMaster.Models.OrderStatus.Processing => "fas fa-cogs",
+            ShopMaster.Models.OrderStatus.Shipped => "fas fa-shipping-fast",
+            ShopMaster.Models.OrderStatus.Delivered => "fas fa-box-open",
+            ShopMaster.Models.OrderStatus.Cancelled => "fas fa-times-circle",
+            _ => "fas fa-question-circle"
+        };
+    }
+
+    // دالة للحصول على نص حالة الطلب
+    string GetStatusText(ShopMaster.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.OrderStatus.Pending => "قيد الانتظار",
+            ShopMaster.Models.OrderStatus.Confirmed => "مؤكد",
+            ShopMaster.Models.OrderStatus.Processing => "قيد التجهيز",
+            ShopMaster.Models.OrderStatus.Shipped => "تم الشحن",
+            ShopMaster.Models.OrderStatus.Delivered => "تم التوصيل",
+            ShopMaster.Models.OrderStatus.Cancelled => "ملغي",
+            _ => status.ToString()
+        };
+    }
+
+    // دالة للحصول على كلاس حالة الدفع
+    string GetPaymentStatusClass(ShopMaster.Models.PaymentStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.PaymentStatus.Pending => "badge-pending",
+            ShopMaster.Models.PaymentStatus.Paid => "badge-paid",
+            ShopMaster.Models.PaymentStatus.Failed => "badge-failed",
+            ShopMaster.Models.PaymentStatus.Refunded => "badge-refunded",
+            _ => "badge-secondary"
+        };
+    }
+
+    // دالة للحصول على أيقونة حالة الدفع
+    string GetPaymentStatusIcon(ShopMaster.Models.PaymentStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.PaymentStatus.Pending => "fas fa-clock",
+            ShopMaster.Models.PaymentStatus.Paid => "fas fa-check-circle",
+            ShopMaster.Models.PaymentStatus.Failed => "fas fa-times-circle",
+            ShopMaster.Models.PaymentStatus.Refunded => "fas fa-undo",
+            _ => "fas fa-question-circle"
+        };
+    }
+
+    // دالة للحصول على نص حالة الدفع
+    string GetPaymentStatusText(ShopMaster.Models.PaymentStatus status)
+    {
+        return status switch
+        {
+            ShopMaster.Models.PaymentStatus.Pending => "في الانتظار",
+            ShopMaster.Models.PaymentStatus.Paid => "مدفوع",
+            ShopMaster.Models.PaymentStatus.Failed => "فشل الدفع",
+            ShopMaster.Models.PaymentStatus.Refunded => "مسترد",
+            _ => status.ToString()
+        };
+    }
+}
+
+<style>
+    /* تنسيقات الـ Partial View فقط */
+    .order-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        border: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+        .order-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .order-number {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .order-date {
+        color: #64748b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .order-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px dashed #f1f5f9;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-value {
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 500;
+        text-align: left;
+    }
+
+    .badge-status {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-width: 100px;
+        justify-content: center;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fbbf24;
+    }
+
+    .badge-confirmed {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .badge-processing {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #6366f1;
+    }
+
+    .badge-shipped {
+        background: #f3e8ff;
+        color: #6b21a8;
+        border: 1px solid #a855f7;
+    }
+
+    .badge-delivered {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #22c55e;
+    }
+
+    .badge-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .badge-failed {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+
+    .badge-refunded {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #6366f1;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-view {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
+    }
+
+        .btn-view:hover {
+            background: #93c5fd;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-edit {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fbbf24;
+    }
+
+        .btn-edit:hover {
+            background: #fbbf24;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        margin-top: 20px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .no-results-icon {
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+</style>

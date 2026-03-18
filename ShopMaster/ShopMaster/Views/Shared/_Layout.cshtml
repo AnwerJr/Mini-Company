@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - نظام إدارة المتجر</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px 0;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+            .sidebar::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .sidebar::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.3);
+                border-radius: 10px;
+            }
+
+        .sidebar-header {
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+            .sidebar-header h3 {
+                color: white;
+                font-size: 1.4rem;
+                font-weight: 700;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .sidebar-header p {
+                color: rgba(255,255,255,0.7);
+                font-size: 0.85rem;
+                margin: 5px 0 0 0;
+            }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .menu-section-title {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 15px 10px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .sidebar-menu li a::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 0;
+                height: 100%;
+                background: rgba(255,255,255,0.1);
+                transition: width 0.3s ease;
+            }
+
+            .sidebar-menu li a:hover {
+                background: rgba(255,255,255,0.15);
+                color: white;
+                transform: translateX(-3px);
+            }
+
+                .sidebar-menu li a:hover::before {
+                    width: 100%;
+                }
+
+            .sidebar-menu li a.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            }
+
+            .sidebar-menu li a i {
+                font-size: 1.1rem;
+                width: 25px;
+                text-align: center;
+            }
+
+        .menu-badge {
+            margin-right: auto;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-right: 280px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+            .top-navbar h4 {
+                margin: 0;
+                color: #2d3748;
+                font-weight: 600;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        /* Responsive */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar
+
+        {
+            transform: translateX(100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-right: 0;
+        }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="fas fa-shopping-cart"></i>
+                Shop Master
+            </h3>
+            <p>لوحة التحكم الرئيسية</p>
+        </div>
+
+        <ul class="sidebar-menu">
+            <!-- Dashboard -->
+            <li class="menu-section-title">القائمة الرئيسية</li>
+            <li>
+                <a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+
+            <!-- المنتجات -->
+            <li class="menu-section-title">إدارة المنتجات</li>
+            <li>
+                <a href="@Url.Action("Index", "Categories")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Categories" ? "active" : "")">
+                    <i class="fas fa-tags"></i>
+                    <span>الفئات</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Products")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Products" ? "active" : "")">
+                    <i class="fas fa-box"></i>
+                    <span>المنتجات</span>
+                </a>
+            </li>
+
+            <!-- المبيعات -->
+            <li class="menu-section-title">المبيعات والطلبات</li>
+            <li>
+                <a href="@Url.Action("Index", "Customers")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customers" ? "active" : "")">
+                    <i class="fas fa-users"></i>
+                    <span>العملاء</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Orders")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Orders" ? "active" : "")">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>الطلبات</span>
+                    <span class="menu-badge">جديد</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Shipments")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Shipments" ? "active" : "")">
+                    <i class="fas fa-truck"></i>
+                    <span>الشحن والتوصيل</span>
+                </a>
+            </li>
+
+            <!-- التقارير -->
+            <li class="menu-section-title">التقارير والإحصائيات</li>
+
+            <li>
+                <a href="@Url.Action("Index", "Sales_reports")"
+                   class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Sales_reports" ? "active" : "")">
+                    <i class="fas fa-chart-line"></i>
+                    <span>تقارير المبيعات</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="@Url.Action("Index", "Analysis")"
+                   class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Analysis" ? "active" : "")">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>تحليل الأداء</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="@Url.Action("Index", "Financial_reports")"
+                   class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Financial_reports" ? "active" : "")">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>التقارير المالية</span>
+                </a>
+            </li>
+
+
+            <!-- الإعدادات -->
+            <li class="menu-section-title">الإعدادات</li>
+            <li>
+                <a href="@Url.Action("Index", "Settings")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" ? "active" : "")">
+                    <i class="fas fa-cog"></i>
+                    <span>إعدادات النظام</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Users")" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+                    <i class="fas fa-user-cog"></i>
+                    <span>إدارة المستخدمين</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div>
+                <h4>@ViewData["Title"]</h4>
+            </div>
+            <div class="user-info">
+                <div>
+                    <small class="text-muted d-block">مرحباً</small>
+                    <strong>المسؤول</strong>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Highlight active menu item
+        const currentPath = window.location.pathname;
+        const menuLinks = document.querySelectorAll('.sidebar-menu a');
+
+        menuLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

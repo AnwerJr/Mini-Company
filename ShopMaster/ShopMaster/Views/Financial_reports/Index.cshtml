@@ -1,0 +1,286 @@
+﻿@using ShopMaster.ViewModels
+@model FinancialReportViewModel
+
+@{
+    ViewData["Title"] = "التقارير المالية";
+    var arabicMonths = new[] { "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر" };
+}
+
+<style>
+    .financial-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+        .financial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .profit-box {
+        padding: 25px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .revenue-box {
+        padding: 25px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .expense-box {
+        padding: 25px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .filter-bar {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+
+    .progress-thin {
+        height: 8px;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <!-- عنوان الصفحة مع الفلاتر -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="section-title">💰 التقارير المالية</h1>
+            <p class="text-muted">تحليل مالي شامل وإحصائيات الإيرادات والتكاليف</p>
+        </div>
+        <div class="col-md-6">
+            <div class="filter-bar">
+                <form method="get" class="row g-2">
+                    <div class="col-5">
+                        <select name="year" class="form-select" onchange="this.form.submit()">
+                            @foreach (var y in Model.AvailableYears)
+                            {
+                                <option value="@y" selected="@(y == Model.SelectedYear ? true : false)">
+                                    @y
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <select name="month" class="form-select">
+                            <option value="">كل الشهور</option>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <option value="@m" selected="@(m == Model.SelectedMonth ? true : false)">
+                                    @arabicMonths[m - 1]
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary w-100">عرض</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الملخص المالي -->
+    <div class="row g-4 mb-4">
+        <!-- الإيرادات الإجمالية -->
+        <div class="col-md-3">
+            <div class="revenue-box">
+                <div class="stat-label">إجمالي الإيرادات</div>
+                <div class="stat-value">@Model.GrossRevenue.ToString("N0")</div>
+                <small>ج.م</small>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between">
+                        <span>مكتملة</span>
+                        <span>@Model.TotalCompletedOrders</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تكلفة البضاعة -->
+        <div class="col-md-3">
+            <div class="expense-box">
+                <div class="stat-label">تكلفة البضاعة (COGS)</div>
+                <div class="stat-value">@Model.COGS.ToString("N0")</div>
+                <small>ج.م</small>
+                <div class="mt-3">
+                    <div class="progress progress-thin">
+                        <div class="progress-bar bg-warning" style="width: 60%"></div>
+                    </div>
+                    <small>60% من الإيرادات</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- إجمالي الربح -->
+        <div class="col-md-3">
+            <div class="profit-box">
+                <div class="stat-label">إجمالي الربح</div>
+                <div class="stat-value">@Model.GrossProfit.ToString("N0")</div>
+                <small>ج.م</small>
+                <div class="mt-3">
+                    <span class="badge bg-white text-success">
+                        هامش الربح: @Model.GrossProfitMargin.ToString("F1")%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الطلبات المعلقة والملغية -->
+        <div class="col-md-3">
+            <div class="financial-card card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">حالات الطلبات</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>معلقة</span>
+                        <span class="badge bg-warning">@Model.TotalPendingOrders</span>
+                        <span>@Model.PendingValue.ToString("N0") ج.م</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>ملغية</span>
+                        <span class="badge bg-danger">@Model.TotalCancelledOrders</span>
+                        <span>@Model.CancelledValue.ToString("N0") ج.م</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الأداء المالي الشهري -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="financial-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">📊 الأداء المالي الشهري @Model.SelectedYear</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الشهر</th>
+                                    <th class="text-center">الإيرادات</th>
+                                    <th class="text-center">التكلفة</th>
+                                    <th class="text-center">الربح</th>
+                                    <th class="text-center">هامش الربح</th>
+                                    <th class="text-center">عدد الطلبات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var month in Model.MonthlyFinancials)
+                                {
+                                    var margin = month.GrossRevenue > 0 ? (month.GrossProfit / month.GrossRevenue) * 100 : 0;
+                                    <tr>
+                                        <td><strong>@arabicMonths[month.Month - 1]</strong></td>
+                                        <td class="text-center">@month.GrossRevenue.ToString("N0") ج.م</td>
+                                        <td class="text-center">@month.COGS.ToString("N0") ج.م</td>
+                                        <td class="text-center">@month.GrossProfit.ToString("N0") ج.م</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">@margin.ToString("F1")%</span>
+                                        </td>
+                                        <td class="text-center">@month.OrderCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحليل الإيرادات حسب الفئة وأعلى الطلبات -->
+    <div class="row g-4">
+        <!-- الإيرادات حسب الفئة -->
+        <div class="col-lg-6">
+            <div class="financial-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">📦 توزيع الإيرادات حسب الفئة</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var category in Model.RevenueByCategory)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>@category.CategoryName</span>
+                                <span>
+                                    <strong>@category.Revenue.ToString("N0") ج.م</strong>
+                                    <small class="text-muted me-2">(@category.RevenueShare.ToString("F1")%)</small>
+                                </span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-primary"
+                                     style="width: @category.RevenueShare%"></div>
+                            </div>
+                            <small class="text-muted">@category.ItemsSold قطعة مباعة</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- أعلى 5 طلبات -->
+        <div class="col-lg-6">
+            <div class="financial-card card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">🏆 أعلى 5 طلبات قيمة</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>العميل</th>
+                                    <th>التاريخ</th>
+                                    <th>المنتجات</th>
+                                    <th>الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.TopOrders)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderId">
+                                                #@order.OrderId
+                                            </a>
+                                        </td>
+                                        <td>@order.CustomerName</td>
+                                        <td>@order.OrderDate.ToString("yyyy/MM/dd")</td>
+                                        <td>@order.ItemCount منتج</td>
+                                        <td><strong>@order.TotalAmount.ToString("N0")</strong> ج.م</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
